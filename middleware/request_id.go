@@ -25,7 +25,7 @@ type RequestIDConfig struct {
 
 	// Length defines the exact generated length of the `X-Request-Id`
 	// Optional. Default value is 32
-	Length int
+	Length uint8
 }
 
 // RequestID returns a middleware that reads RequestIDConfig.TargetHeader (`X-Request-Id`) header value or when
@@ -44,7 +44,7 @@ func RequestIDWithConfig(config RequestIDConfig) echo.MiddlewareFunc {
 
 // ToMiddleware converts RequestIDConfig to middleware or returns an error for invalid configuration
 func (config RequestIDConfig) ToMiddleware() (echo.MiddlewareFunc, error) {
-	length := 32
+	length := uint8(32)
 	if config.Skipper == nil {
 		config.Skipper = DefaultSkipper
 	}

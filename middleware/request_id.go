@@ -22,9 +22,13 @@ type RequestIDConfig struct {
 	// TargetHeader defines what header to look for to populate the id.
 	// Optional. Default value is `X-Request-Id`
 	TargetHeader string
+
+	// Length defines the exact generated length of the `X-Request-Id`
+	// Optional. Default value is 32
+	Length int
 }
 
-// RequestID returns a middleware that reads RequestIDConfig.TargetHeader (`X-Request-ID`) header value or when
+// RequestID returns a middleware that reads RequestIDConfig.TargetHeader (`X-Request-Id`) header value or when
 // the header value is empty, generates that value and sets request ID to response
 // as RequestIDConfig.TargetHeader (`X-Request-Id`) value.
 func RequestID() echo.MiddlewareFunc {
@@ -32,7 +36,7 @@ func RequestID() echo.MiddlewareFunc {
 }
 
 // RequestIDWithConfig returns a middleware with given valid config or panics on invalid configuration.
-// The middleware reads RequestIDConfig.TargetHeader (`X-Request-ID`) header value or when the header value is empty,
+// The middleware reads RequestIDConfig.TargetHeader (`X-Request-Id`) header value or when the header value is empty,
 // generates that value and sets request ID to response as RequestIDConfig.TargetHeader (`X-Request-Id`) value.
 func RequestIDWithConfig(config RequestIDConfig) echo.MiddlewareFunc {
 	return toMiddlewareOrPanic(config)
@@ -40,11 +44,15 @@ func RequestIDWithConfig(config RequestIDConfig) echo.MiddlewareFunc {
 
 // ToMiddleware converts RequestIDConfig to middleware or returns an error for invalid configuration
 func (config RequestIDConfig) ToMiddleware() (echo.MiddlewareFunc, error) {
+	length := 32
 	if config.Skipper == nil {
 		config.Skipper = DefaultSkipper
 	}
+	if config.Length > 0 {
+		length = config.Length
+	}
 	if config.Generator == nil {
-		config.Generator = createRandomStringGenerator(32)
+		config.Generator = createRandomStringGenerator(length)
 	}
 	if config.TargetHeader == "" {
 		config.TargetHeader = echo.HeaderXRequestID
